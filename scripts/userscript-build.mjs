@@ -5,7 +5,7 @@ if (!existsSync(entry)) {
   console.log('Capture helper will be added in phase 2.');
   process.exit(0);
 }
-const banner = `// ==UserScript==\n// @name AMA SportData Capture Helper\n// @namespace https://ama-tatami-planner.local\n// @version 1.0.0\n// @description Explicit visible-page capture for AMA Tatami Planner\n// @match https://www.sportdata.org/*\n// @match https://sportdata.org/*\n// @grant GM_getValue\n// @grant GM_setValue\n// @grant GM_deleteValue\n// @run-at document-idle\n// ==/UserScript==`;
+const banner = `// ==UserScript==\n// @name AMA SportData Capture Helper\n// @namespace https://ama-tatami-planner.local\n// @version 1.0.1\n// @description Explicit visible-page capture for AMA Tatami Planner\n// @match https://www.sportdata.org/*\n// @match https://sportdata.org/*\n// @grant GM_getValue\n// @grant GM_setValue\n// @grant GM_deleteValue\n// @run-at document-idle\n// ==/UserScript==`;
 const result = await build({
   entryPoints: [entry],
   bundle: true,

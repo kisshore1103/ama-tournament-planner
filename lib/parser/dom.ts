@@ -45,19 +45,37 @@ export function visible(el: Element): boolean {
 }
 const txt = (el?: Element | null) =>
   el && visible(el) ? (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 300) : '';
+function visibleVerificationText(el: Element): string {
+  // Skip whole hidden subtrees, including stale challenge UI and our own control.
+  // Reading an ancestor's textContent would include those descendants again.
+  const walker = el.ownerDocument.createTreeWalker(el, 5, {
+    acceptNode(node) {
+      if (node.nodeType === 1) return visible(node as Element) ? 3 : 2;
+      return 1;
+    },
+  });
+  let result = '';
+  let node: Node | null;
+  while (result.length < 500 && (node = walker.nextNode())) {
+    result += ` ${(node.textContent || '').replace(/\s+/g, ' ').trim()}`;
+  }
+  return result.slice(0, 500);
+}
 export function verificationDetected(doc: Document): boolean {
   if (/verif(?:y|ying|ication)|just a moment|security check/i.test(doc.title)) return true;
   if (
-    doc.querySelector(
-      'iframe[src*="captcha"], iframe[src*="challenge"], .cf-challenge, #challenge-form, .g-recaptcha, .h-captcha',
-    )
+    Array.from(
+      doc.querySelectorAll(
+        'iframe[src*="captcha"], iframe[src*="challenge"], .cf-challenge, #challenge-form, .g-recaptcha, .h-captcha',
+      ),
+    ).some(visible)
   )
     return true;
   return Array.from(doc.querySelectorAll('h1,h2,p,div'))
     .filter(visible)
     .some((el) =>
       /verifying you are not a robot|verify you are human|complete the security check/i.test(
-        (el.textContent || '').slice(0, 500),
+        visibleVerificationText(el),
       ),
     );
 }

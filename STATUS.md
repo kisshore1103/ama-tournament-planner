@@ -65,7 +65,17 @@ See `README.md` for exact run/setup/capture/publishing steps, and `docs/REPOSITO
 - [x] Verified actual environment files and organizer recovery files are ignored; added private-key/certificate and secret-directory exclusions.
 - [x] Tracked-file credential-pattern scan found no secrets; `AGENTS.md` and `BUILD_PROMPT.md` remain unchanged.
 
-## Findings
+## Capture-helper maintenance — version 1.0.1
+
+- [x] Investigated an ordinary draw screenshot showing the verification-only helper UI. Found hidden widget selectors and hidden descendant text could cause false positives; the exact live matching element is not known from the screenshot.
+- [x] Restrict widget and text detection to visible content, excluding hidden subtrees, scripts and the helper itself. Preserve title/visible-challenge guards, including a challenge appearing after the helper opens.
+- [x] Add seven parser/helper regressions; all 95 unit/integration tests pass. Lint, strict TypeScript, formatting and rebuilt-userscript syntax/safety checks pass.
+- [x] Build both generated helper copies as 1.0.1 and document updating an already installed script.
+- [x] Preserve owner-entered environment configuration in ignored `.env.local`; restore `.env.example` to committed placeholders. No credentials added to Git.
+- [x] Production build and all 18 mobile/desktop Playwright journeys passed for this maintenance checkpoint. Browser tests used localhost and the test-only memory store, without accessing SportData or cloud Redis.
+- [ ] Confirm the updated helper on the owner's real visible draw; manual corrections remain available for unrecognized layouts.
+
+## Earlier findings
 
 - Node.js 24 and npm 11 are available. Use `npm.cmd` to avoid the blocked PowerShell script launcher. pnpm is absent; npm is the selected package manager.
 - Initial Git branch: `main`, one existing commit ahead of origin; user commits are preserved.

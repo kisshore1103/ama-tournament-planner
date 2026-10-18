@@ -4,7 +4,7 @@ Automated tests use synthetic, sanitized static pages. They do not contact Sport
 
 ## Detection and selectors
 
-The parser first checks visible verification indicators and challenge-container presence without reading answers. It then classifies semantic tables/headings into event, entries, participants, timetable or draw pages. The helper lets the user choose a type when detection is uncertain. Selectors and header aliases live in `lib/parser`; UI code does not contain tournament selectors.
+The parser first checks verification titles, visible challenge containers/frames and visible verification text without reading answers. Hidden widget remnants, hidden descendant text, scripts and the helper's own UI are excluded. A visible challenge still blocks capture even alongside normal tournament content, and the helper checks again at the capture tap. It then classifies semantic tables/headings into event, entries, participants, timetable or draw pages. The helper lets the user choose a type when detection is uncertain. Selectors and header aliases live in `lib/parser`; UI code does not contain tournament selectors.
 
 Entries require identifiable athlete and club fields, with category fields or a contextual heading. Team members are extracted only from explicitly labelled member lists. Timetables recognize labelled columns and conservative time/Tatami grids; unrecognized cells produce warnings. Draws use labelled main-pool headings and participant rows, excluding repechage, finals and poolwinner rounds.
 

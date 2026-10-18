@@ -56,6 +56,35 @@ describe('capture parser', () => {
       'Complete SportData verification normally',
     );
   });
+  it('parses a loaded draw with hidden verification remnants', () => {
+    const doc = documentFor('draw');
+    const wrapper = doc.createElement('div');
+    wrapper.innerHTML =
+      '<section hidden><div class="g-recaptcha"></div><iframe src="https://example.invalid/challenge"></iframe></section><section style="display:none"><p>Verify you are human</p></section>';
+    doc.body.prepend(wrapper);
+    expect(verificationDetected(doc)).toBe(false);
+    expect(
+      parsePage(doc, context).assignments.find((a) => a.normalizedStudentName === 'asha rao')?.pool,
+    ).toBe('2');
+  });
+  it.each([
+    '<div class="g-recaptcha"></div>',
+    '<iframe src="https://example.invalid/challenge"></iframe>',
+    '<h2>Verify <span>you are</span> human</h2>',
+  ])('blocks visible verification even alongside a draw: %s', (markup) => {
+    const doc = documentFor('draw');
+    doc.body.insertAdjacentHTML('afterbegin', markup);
+    expect(verificationDetected(doc)).toBe(true);
+    expect(() => parsePage(doc, context)).toThrow('Complete SportData verification normally');
+  });
+  it('does not mistake the helper or script text for page verification', () => {
+    const doc = documentFor('draw');
+    doc.body.insertAdjacentHTML(
+      'afterbegin',
+      '<div><div id="ama-capture-control"><p>Verify you are human</p></div><script>const label = "Verify you are human";</script></div>',
+    );
+    expect(verificationDetected(doc)).toBe(false);
+  });
   it('parses and deduplicates entries with teams and club filtering', () => {
     const page = parsePage(documentFor('entries'), context);
     expect(page.type).toBe('entries');

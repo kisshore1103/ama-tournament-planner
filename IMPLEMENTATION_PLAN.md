@@ -18,6 +18,10 @@ Build explicit-tap visible-page-only SportData userscript, collapsible control, 
 
 Specification mapping: §§9–13, 21, 33, 35–36 (parsers), 38 (capture/parser guides), 40–41. AC8–12, 61. Also completes capture paths supporting AC13–22, 26. Never inspect challenge answers, use SportData network APIs, navigate automatically, export cookies, or upload HTML.
 
+### Capture maintenance — loaded page incorrectly blocked
+
+Investigate verification false positives reported on an ordinary visible draw. Restrict DOM verification evidence to visible content, excluding hidden widget remnants and the helper itself; continue blocking verification titles, visible challenge containers/frames and visible human-verification messages. Add synthetic parser/helper regressions, rebuild/version the userscript, document updating an installed script and run all release checks. The reported screenshot does not identify the exact matching element; confirm the installed update on the real page manually. This maintenance supports §§9–10, 33, 35–37 and AC8–12, 25–26, 64–67 without changing source access or manual fallback behavior.
+
 ## Phase 3 — exact pool mapping and review
 
 Implement conservative normalized athlete/category matching, initial draw pool selection excluding finals/repechage/poolwinner rounds, category-ID-first timetable mapping, duplicate handling, stable IDs, review explanations, override precedence, missing-draw queue and optional Possible Later Rounds. Checkpoint after fixture/mapping/manual correction tests.

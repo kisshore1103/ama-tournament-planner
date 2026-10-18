@@ -18,6 +18,14 @@ On Android, open the site in Chrome, Edge or another browser supporting installa
 
 Userscript support depends on the browser and manager. If it is unavailable, use manual entry, CSV/TSV, or saved HTML imported locally. Other coaches opening a published link need only a modern browser; they do not need this helper, Firefox, or installation.
 
+## Update an installed capture helper
+
+The helper installed in Tampermonkey is a separate copy; deploying the planner does not replace it immediately. After the deployment is ready, reopen **Install SportData capture helper** from the planner. Accept **Update** or **Reinstall** in the manager, then check that its dashboard lists version **1.0.1** or later. If the link displays code, replace the contents of the existing helper in the manager's editor with the new file and save; do not create a second enabled copy. Reload the SportData tab.
+
+The control appears in the bottom-left corner of an ordinary SportData page. Expand **Capture for AMA Planner**, check the event ID, club aliases and timezone, choose **draw** for an initial pool/draw, then select **Capture Current Page**. Review the counts before exporting. A draw capture does not replace the entries and timetable captures. If the page layout is unrecognized or no assignments are found, use manual entry/correction rather than assume the draw was understood.
+
+Version 1.0.1 fixes hidden verification remnants incorrectly blocking ordinary pages. A real visible challenge still disables capture: finish it manually, wait for the ordinary page to load, then close and reopen the helper. There is no override for a visible verification screen.
+
 ## At the tournament
 
 Check the event timezone, switch to **Now and Next**, and check unresolved rows before relying on a Tatami assignment. The app follows scheduled times, not live referee progress. Optional notifications work while the page is open; closed-app delivery is not promised. Test offline mode before leaving home. Keep a JSON export and, if published, a separate private organizer recovery file.

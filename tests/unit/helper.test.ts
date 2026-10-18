@@ -53,6 +53,41 @@ describe('visible explicit-tap helper', () => {
     ]);
     expect(save).not.toHaveBeenCalled();
   });
+  it('captures only on a tap when inactive challenge UI is CSS-hidden', async () => {
+    const { control, save } = await helper('draw');
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML =
+      '<style>.inactive-challenge-fixture{display:none}</style><section class="inactive-challenge-fixture"><div class="g-recaptcha"></div><p>Verify you are human</p></section>';
+    document.body.prepend(wrapper);
+    control.open = true;
+    control.dispatchEvent(new Event('toggle'));
+    expect(save).not.toHaveBeenCalled();
+    const button = Array.from(control.querySelectorAll('button')).find(
+      (b) => b.textContent === 'Capture Current Page',
+    );
+    expect(button).toBeDefined();
+    button!.click();
+    expect(save).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(save.mock.calls[0][1])).not.toContain('inactive-challenge-fixture');
+  });
+  it('blocks capture if a visible challenge appears after expansion', async () => {
+    const { control, save } = await helper('entries');
+    control.open = true;
+    control.dispatchEvent(new Event('toggle'));
+    const challenge = document.createElement('div');
+    challenge.id = 'challenge-form';
+    document.body.prepend(challenge);
+    Array.from(control.querySelectorAll('button'))
+      .find((b) => b.textContent === 'Capture Current Page')!
+      .click();
+    expect(save).not.toHaveBeenCalled();
+    await vi.waitFor(() => {
+      expect(control.textContent).toContain('Complete SportData verification normally');
+      expect(Array.from(control.querySelectorAll('button')).map((b) => b.textContent)).toEqual([
+        'Close',
+      ]);
+    });
+  });
   it('refuses a capture if the page becomes hidden', async () => {
     const { control, save } = await helper('entries');
     control.open = true;
