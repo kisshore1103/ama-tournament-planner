@@ -15,15 +15,38 @@ Authoritative scope: `BUILD_PROMPT.md`. See `IMPLEMENTATION_PLAN.md` for section
 - [x] Phase 3 checks and Git checkpoint: 52 unit/integration tests, 6 phone/desktop journeys, formatting, lint, strict TypeScript, userscript checks and production build passed.
 - [x] Phase 4: secure API, publication lifecycle, sharing/recovery and read-only offline-refresh view.
 - [x] Phase 4 checks and Git checkpoint: 79 unit/integration tests, 12 mobile/desktop journeys, lint, strict TypeScript, formatting, userscript checks and production build passed. Real Upstash connectivity remains an owner-account smoke test.
-- [ ] Phase 5: complete documentation, security/accessibility review and automated coverage.
-- [ ] Formatting check.
-- [ ] ESLint.
-- [ ] Strict TypeScript.
-- [ ] Unit/integration tests.
-- [ ] Userscript checks/build.
-- [ ] Playwright mobile/desktop.
-- [ ] Production build.
-- [ ] Final specification integrity/secret review and Git checkpoint.
+- [x] Phase 5: complete documentation, security/accessibility review and automated coverage.
+- [x] Formatting check.
+- [x] ESLint (zero warnings).
+- [x] Strict TypeScript.
+- [x] Unit/integration tests: 88 passing tests across 7 files.
+- [x] Userscript checks/build: syntax, narrow host scope, visible explicit-tap guard and prohibited-API scan passed.
+- [x] Playwright: all 18 mobile/desktop journeys passed; two additional focused runs confirmed visible descending student order on both layouts.
+- [x] Production build: organizer, APIs, shared route and two distinct offline shells passed.
+- [x] Final specification integrity/secret review and Git checkpoint (see Git log).
+
+## Final local verification — October 18, 2026
+
+The complete application is implemented and verified locally on Node.js 24.21.0. This is **not** a claim that a Vercel deployment or real Upstash connection has been performed. AC1 and physical-device/live-source verification remain external steps below.
+
+| Check                          | Result                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------- |
+| `npm.cmd run format:check`     | Passed                                                                    |
+| `npm.cmd run lint`             | Passed                                                                    |
+| `npm.cmd run typecheck`        | Passed                                                                    |
+| `npm.cmd test`                 | 88 passed                                                                 |
+| `npm.cmd run userscript:build` | Passed                                                                    |
+| `npm.cmd run userscript:check` | Passed                                                                    |
+| `npm.cmd run test:e2e`         | 18 passed (phone + desktop)                                               |
+| Focused sorting browser check  | 2 passed                                                                  |
+| `npm.cmd run build`            | Passed                                                                    |
+| Git/source review              | Specification and AGENTS unchanged; private artifacts and secrets ignored |
+
+Browser coverage includes manual entry/timetable/correction, capture JSON and saved HTML, exact pool/Tatami mapping, persistence, views/tabs/filters/sorting, organizer and shared offline reloads, publishing resolved rows, clipboard/native fallback/WhatsApp/QR, automatic/manual/304 refresh, temporary failure preservation, recovery on another browser context, unpublish, old-link invalidation, read-only controls and security headers. Mobile offline organizer screenshots were visually inspected.
+
+Parser boundaries: semantic text tables, conservative grids and initial draw sections are supported. Image/PDF/canvas brackets, unlabelled layouts, missing date context, ambiguous names and unidentified team members require manual correction. Fixtures are synthetic; no live SportData event data is hard-coded or assumed verified. Explicit non-Karate systems and verification pages are rejected, and CSS-hidden ancestors are excluded from visible-page capture.
+
+See `README.md` for exact run/setup/capture/publishing steps, and `docs/REPOSITORY_TREE.md` for the full source tree. No code changes or cloud secrets are needed to use the manual organizer locally.
 
 ## External steps (owner account/device required)
 
@@ -41,3 +64,4 @@ Authoritative scope: `BUILD_PROMPT.md`. See `IMPLEMENTATION_PLAN.md` for section
 - One interrupted dependency installation was repaired with a clean repository-local reinstall. Dependency lockfile and repository-local browser/cache configuration are present.
 - First Playwright run exposed a select-label locator mismatch; corrected to an accessible combobox-role locator. All four organizer scenarios then passed.
 - Sharing browser coverage found and fixed an unbound native browser fetch call; a receiver-binding regression test now covers it. Full sharing, polling, offline reload, recovery and tournament invalidation journeys pass locally.
+- Helper tests now import the module once outside timed assertions and install it explicitly into each fixture; two workers avoid Windows startup contention. No safety assertion was removed or weakened.

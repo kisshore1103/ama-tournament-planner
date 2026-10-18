@@ -1,4 +1,9 @@
-import { rowSchema, type ScheduleRow, type Tournament } from '@/lib/validation/models';
+import {
+  rowSchema,
+  type ScheduleRow,
+  type Tournament,
+  type WorkingData,
+} from '@/lib/validation/models';
 import { makeRow } from '@/lib/schedule/core';
 const columns = [
   'studentName',
@@ -91,6 +96,16 @@ export function importRows(value: string, tournament: Tournament): ScheduleRow[]
     } catch {
       throw new Error('Invalid JSON. The existing schedule has been kept.');
     }
+    if (!Array.isArray(data) && data.eventId && data.eventId !== tournament.eventId)
+      throw new Error('This schedule belongs to another tournament.');
+    if (
+      !Array.isArray(data) &&
+      data.eventTimezone &&
+      data.eventTimezone !== tournament.eventTimezone
+    )
+      throw new Error(
+        `This schedule uses ${String(data.eventTimezone).slice(0, 100)}. Set that event timezone before importing.`,
+      );
     fields = Array.isArray(data) ? data : data.rows;
     if (!Array.isArray(fields)) throw new Error('Schedule JSON must contain rows.');
     return fields.map((r, i) => {
@@ -109,8 +124,44 @@ export function importRows(value: string, tournament: Tournament): ScheduleRow[]
     }
   });
 }
+export function scheduleExport(data: WorkingData) {
+  return JSON.stringify(
+    {
+      schemaVersion: 1,
+      eventId: data.tournament.eventId,
+      eventName: data.tournament.eventName,
+      eventTimezone: data.tournament.eventTimezone,
+      clubDisplayName: data.settings.clubDisplayName,
+      eventDays: data.tournament.eventDays,
+      tournamentUrl: data.tournament.tournamentUrl,
+      timetableUrl: data.tournament.timetableUrl,
+      rows: data.rows,
+    },
+    null,
+    2,
+  );
+}
 const escapeICS = (s: string) =>
   s.replaceAll('\\', '\\\\').replaceAll('\n', '\\n').replaceAll(',', '\\,').replaceAll(';', '\\;');
+function foldICS(line: string) {
+  const encoder = new TextEncoder();
+  const lines: string[] = [];
+  let current = '',
+    bytes = 0;
+  for (const char of line) {
+    const size = encoder.encode(char).length;
+    if (bytes + size > 75) {
+      lines.push(current);
+      current = ' ' + char;
+      bytes = 1 + size;
+    } else {
+      current += char;
+      bytes += size;
+    }
+  }
+  lines.push(current);
+  return lines.join('\r\n');
+}
 export function toICS(rows: ScheduleRow[]) {
   return [
     'BEGIN:VCALENDAR',
@@ -136,7 +187,7 @@ export function toICS(rows: ScheduleRow[]) {
       ]),
     'END:VCALENDAR',
   ]
-    .map((line) => line.match(/.{1,70}/gu)?.join('\r\n ') || '')
+    .map(foldICS)
     .join('\r\n');
 }
 export function eventDetails(rows: ScheduleRow[]) {
@@ -157,5 +208,5 @@ export async function copyText(text: string) {
 }
 export async function shareText(title: string, text: string, url?: string) {
   if (navigator.share) await navigator.share({ title, text, ...(url ? { url } : {}) });
-  else await copyText(url || text);
+  else await copyText([title, text, ...(url ? [url] : [])].join('\n\n'));
 }

@@ -18,7 +18,7 @@ type Cache = {
   remove: (id: string) => Promise<void>;
 };
 export function refreshSeconds(value: number) {
-  return Math.max(30, Math.min(60, Number.isFinite(value) ? value : 45));
+  return Math.round(Math.max(30, Math.min(60, Number.isFinite(value) ? value : 45)));
 }
 export class SchedulePoller {
   state: RefreshState = {
@@ -35,6 +35,7 @@ export class SchedulePoller {
   private active = false;
   private timer: ReturnType<typeof setTimeout> | undefined;
   private controller: AbortController | undefined;
+  private highlightTimer: ReturnType<typeof setTimeout> | undefined;
   private failures = 0;
   private hiddenAt = 0;
   readonly interval: number;
@@ -116,6 +117,7 @@ export class SchedulePoller {
     this.active = false;
     this.clear();
     this.controller?.abort();
+    if (this.highlightTimer) clearTimeout(this.highlightTimer);
     document.removeEventListener('visibilitychange', this.visibility);
     window.removeEventListener('offline', this.offline);
     window.removeEventListener('online', this.online);
@@ -177,6 +179,9 @@ export class SchedulePoller {
         unavailable: false,
         changedIds,
       });
+      if (this.highlightTimer) clearTimeout(this.highlightTimer);
+      if (changedIds.length)
+        this.highlightTimer = setTimeout(() => this.update({ changedIds: [] }), 20000);
       try {
         await this.cache.write(schedule, etag);
       } catch {

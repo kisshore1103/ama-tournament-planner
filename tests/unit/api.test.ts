@@ -59,6 +59,23 @@ async function create() {
   return response.json();
 }
 describe('publication security', () => {
+  it('rejects links carrying session or verification parameters', async () => {
+    const p = publicationPayload(working());
+    p.rows[0].drawUrl =
+      'https://sportdata.org/karate/set-online/draw.php?vernr=90001&session=private';
+    expect((await handleApi(request('POST', p), undefined, store)).status).toBe(422);
+  });
+  it('enforces read and write rate limits as well as create limits', async () => {
+    const meta = await create();
+    const read = request('GET');
+    for (let i = 0; i < 240; i++)
+      expect((await handleApi(read, meta.shareId, store)).status).toBe(200);
+    expect((await handleApi(read, meta.shareId, store)).status).toBe(429);
+    const write = request('DELETE');
+    for (let i = 0; i < 60; i++)
+      expect((await handleApi(write, meta.shareId, store)).status).toBe(401);
+    expect((await handleApi(write, meta.shareId, store)).status).toBe(429);
+  });
   it('generates independent cryptographic credentials and secure hashes', () => {
     const a = credentials(),
       b = credentials();

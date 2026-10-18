@@ -11,7 +11,7 @@ These steps require your GitHub, Vercel and Upstash account actions. Local organ
 ## Vercel Hobby and Upstash
 
 1. Sign in to Vercel. Select **Add New → Project**, import the GitHub repository and grant access to that repository.
-2. Select the Next.js framework. Keep the repository root as the root directory. The committed `vercel.json` uses `npm ci` and `npm run build`. Choose a supported Node 24 runtime (or a supported Node version meeting package.json).
+2. Select the Next.js framework. Keep the repository root as the root directory. The committed `vercel.json` uses `npm ci` and `npm run build`. Choose the Node 24 runtime, matching the locally verified version.
 3. In Vercel Marketplace, find **Upstash Redis**, add the integration, create a database, choose a suitable nearby region and connect it to this project. Review the provider's current plan/limits before accepting any billing step. [Vercel's Redis guide](https://vercel.com/docs/redis) describes Marketplace integrations; the old Vercel KV product is not used here.
 4. In Vercel **Project → Settings → Environment Variables**, set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` using the connected database's REST credentials. If the integration supplies differently prefixed names, copy their values into these exact names. They must remain server-only; never add `NEXT_PUBLIC_` to them.
 5. Set `NEXT_PUBLIC_APP_URL` to the final HTTPS project domain, such as `https://your-project.vercel.app`. Set the intended Production/Preview scopes. For a preview deployment, either use its own matching URL or omit this value so the API uses the current request origin. Do not mix production and preview databases unless intentional.

@@ -504,7 +504,9 @@ export default function ScheduleBoard({
               .filter((r) => r.normalizedStudentName === studentKey)
               .sort(chronological);
             const name = own[0].studentName;
-            const upcoming = own.find((r) => Date.parse(r.startDateTimeISO) >= now);
+            const upcoming = own.find(
+              (r) => !r.requiresReview && Date.parse(r.startDateTimeISO) >= now,
+            );
             return (
               <section key={name} className="student-group">
                 <h2>

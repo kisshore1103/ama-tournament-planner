@@ -35,11 +35,13 @@ async function rateLimit(request: Request, store: ScheduleStore, scope: string, 
     : 'local';
   if (
     !(await store.limit(
-      `${scope}:${hashToken(ip).slice(0, 24)}${id ? `:${id}` : ''}`,
+      `${scope}:${hashToken(ip).slice(0, 24)}`,
       scope === 'create' ? 8 : scope === 'read' ? 240 : 60,
       60,
     ))
   )
+    throw new ApiError(429, 'Rate limit reached. Wait a minute and try again.');
+  if (id && !(await store.limit(`${scope}:schedule:${id}`, scope === 'read' ? 240 : 60, 60)))
     throw new ApiError(429, 'Rate limit reached. Wait a minute and try again.');
 }
 export async function readPayload(request: Request): Promise<PublishPayload> {

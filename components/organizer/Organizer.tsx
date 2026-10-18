@@ -15,7 +15,15 @@ import {
   type TimetableRecord,
   type PublishMeta,
 } from '@/lib/validation/models';
-import { copyText, download, eventDetails, importRows, toCSV, toICS } from '@/lib/export/files';
+import {
+  copyText,
+  download,
+  eventDetails,
+  importRows,
+  toCSV,
+  toICS,
+  scheduleExport,
+} from '@/lib/export/files';
 import { Brand, ExternalLink, Field } from '@/components/ui/Fields';
 import ScheduleBoard from '@/components/schedule/ScheduleBoard';
 import EntryForm from './EntryForm';
@@ -472,16 +480,7 @@ export default function Organizer() {
                 <div className="export-actions actions">
                   <button
                     className="secondary"
-                    onClick={() =>
-                      download(
-                        'tournament.ama-schedule.json',
-                        JSON.stringify(
-                          { schemaVersion: 1, eventId: data.tournament.eventId, rows: data.rows },
-                          null,
-                          2,
-                        ),
-                      )
-                    }
+                    onClick={() => download('tournament.ama-schedule.json', scheduleExport(data))}
                   >
                     Export schedule JSON
                   </button>

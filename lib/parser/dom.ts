@@ -1,6 +1,7 @@
 import type { CaptureType, CapturePage } from '@/lib/capture/schema';
 import type { StudentEntry, TimetableRecord, DrawPoolAssignment } from '@/lib/validation/models';
 import { localISO, matchClub, normalize, normalizeName, rowId } from '@/lib/schedule/core';
+import { formatInTimeZone } from 'date-fns-tz';
 
 export const headerAliases: Record<string, string[]> = {
   student: ['student', 'student name', 'name', 'athlete', 'competitor', 'participant', 'team'],
@@ -24,17 +25,23 @@ export function visible(el: Element): boolean {
   if (el.closest('[hidden], [aria-hidden="true"], #ama-capture-control, script, style, template'))
     return false;
   let current: Element | null = el;
+  const view = el.ownerDocument.defaultView;
   while (current) {
     const style = current.getAttribute('style') || '';
     if (/display\s*:\s*none|visibility\s*:\s*hidden/i.test(style)) return false;
+    if (view) {
+      const computed = view.getComputedStyle(current);
+      if (
+        computed.display === 'none' ||
+        computed.visibility === 'hidden' ||
+        computed.opacity === '0' ||
+        computed.contentVisibility === 'hidden'
+      )
+        return false;
+    }
     current = current.parentElement;
   }
-  const view = el.ownerDocument.defaultView;
-  return (
-    !view ||
-    (view.getComputedStyle(el).display !== 'none' &&
-      view.getComputedStyle(el).visibility !== 'hidden')
-  );
+  return true;
 }
 const txt = (el?: Element | null) =>
   el && visible(el) ? (el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 300) : '';
@@ -90,8 +97,11 @@ export function safeSportLink(value: string, base: string): string {
     ]);
     for (const key of [...u.searchParams.keys()])
       if (!allowed.has(key.toLowerCase())) u.searchParams.delete(key);
-    if (u.pathname.startsWith('/setglinc/') && u.searchParams.get('system') !== 'karate')
+    if (u.pathname.startsWith('/setglinc/')) {
+      const system = u.searchParams.get('system');
+      if (system && system.toLowerCase() !== 'karate') return '';
       u.searchParams.set('system', 'karate');
+    }
     return u.href;
   } catch {
     return '';
@@ -117,10 +127,19 @@ function anchorLinks(el: Element, source: string) {
   };
 }
 function categoryIdFrom(el: Element, source: string): string {
-  const anchor = el.querySelector('a[href]');
   try {
-    const u = new URL(anchor?.getAttribute('href') || source, source);
-    return u.searchParams.get('catid') || u.searchParams.get('categoryid') || '';
+    const from = (href: string) => {
+      const u = new URL(href, source);
+      return u.searchParams.get('catid') || u.searchParams.get('categoryid') || '';
+    };
+    const contextual = from(source);
+    if (el === el.ownerDocument.documentElement && contextual) return contextual;
+    return (
+      Array.from(el.querySelectorAll('a[href]'))
+        .filter(visible)
+        .map((a) => from(a.getAttribute('href') || source))
+        .find(Boolean) || contextual
+    );
   } catch {
     return '';
   }
@@ -344,7 +363,7 @@ export function parsePage(doc: Document, context: ParserContext): CapturePage {
         )
           continue;
         const eventDateLabel = get('date') || heading;
-        const eventDateISO = dateFrom(eventDateLabel) || contextDate;
+        let eventDateISO = dateFrom(eventDateLabel) || contextDate;
         const startTimeDisplay = get('start'),
           endTimeDisplay = get('end');
         const poolText =
@@ -365,6 +384,8 @@ export function parsePage(doc: Document, context: ParserContext): CapturePage {
         try {
           startDateTimeISO = localISO(eventDateISO, timeFrom(startTimeDisplay), eventTimezone);
           endDateTimeISO = localISO(eventDateISO, timeFrom(endTimeDisplay), eventTimezone);
+          if (startDateTimeISO && eventTimezone !== context.timezone)
+            eventDateISO = formatInTimeZone(startDateTimeISO, context.timezone, 'yyyy-MM-dd');
           if (startDateTimeISO && endDateTimeISO && endDateTimeISO <= startDateTimeISO) {
             endDateTimeISO = '';
             rowWarnings.push('End time is not after start time. Correct it manually.');
@@ -493,6 +514,22 @@ export function parsePage(doc: Document, context: ParserContext): CapturePage {
     schemaVersion: 1,
     eventId: context.eventId,
     eventName,
+    eventDays: [
+      ...new Set(
+        type === 'event'
+          ? Array.from(doc.querySelectorAll('h1,h2,h3,p,time'))
+              .filter(visible)
+              .flatMap((el) =>
+                [...(el.textContent || '').matchAll(/\b20\d{2}-\d{2}-\d{2}\b/g)].map((m) => m[0]),
+              )
+              .filter(
+                (day) => !isNaN(Date.parse(day)) && new Date(day).toISOString().startsWith(day),
+              )
+          : timetable.map((r) => r.eventDateISO).filter(Boolean),
+      ),
+    ]
+      .slice(0, 60)
+      .sort(),
     sourceUrl,
     type,
     capturedAt: context.capturedAt || new Date().toISOString(),

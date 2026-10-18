@@ -96,6 +96,17 @@ test('publish, clipboard, WhatsApp, local QR, automatic update, offline cache an
   await expect(
     viewer.getByRole('status').filter({ hasText: 'You already have the latest schedule' }),
   ).toBeVisible();
+  await viewer.route('**/api/schedules/*', (route) =>
+    route.fulfill({ status: 503, contentType: 'application/json', body: '{}' }),
+  );
+  await viewer.getByRole('button', { name: 'Refresh', exact: true }).click();
+  await expect(
+    viewer.getByRole('status').filter({
+      hasText: 'Could not check for updates. The last available schedule is still shown.',
+    }),
+  ).toBeVisible();
+  await expect(viewer.locator('.tatami strong').filter({ visible: true })).toHaveText('9');
+  await viewer.unroute('**/api/schedules/*');
   await expect.poll(() => viewer.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
   await context.setOffline(true);
   await viewer.reload({ waitUntil: 'domcontentloaded' });

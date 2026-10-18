@@ -13,6 +13,7 @@ import {
 } from '@/lib/schedule/core';
 import { importRows, parseDelimited, toCSV, toICS } from '@/lib/export/files';
 import { rowSchema, settingsSchema } from '@/lib/validation/models';
+import { checkedLabel } from '@/lib/time/checked';
 const tournament = newWorking(
   'https://www.sportdata.org/karate/set-online/veranstaltung_info_main.php?vernr=90001',
   'Test cup',
@@ -84,6 +85,17 @@ describe('manual schedule', () => {
     expect(settingsSchema.safeParse({ ...defaults, autoRefreshSeconds: 29 }).success).toBe(false));
 });
 describe('manual imports and exports', () => {
+  it('folds UTF-8 calendar lines within 75 octets', () => {
+    const ics = toICS([makeRow({ ...fields, studentName: 'ஆ'.repeat(70) }, tournament)]);
+    expect(ics.split('\r\n').every((line) => new TextEncoder().encode(line).length <= 75)).toBe(
+      true,
+    );
+  });
+  it('does not report an old check as just now', () => {
+    const then = '2026-10-17T12:00:00.000Z';
+    expect(checkedLabel(then, Date.parse(then) + 30000)).toBe('Checked just now');
+    expect(checkedLabel(then, Date.parse(then) + 120000)).toBe('Checked 2 minutes ago');
+  });
   it('handles quoted delimiters and TSV', () => {
     expect(parseDelimited('studentName,categoryName\n"Rao, Asha","Kata"')[0].studentName).toBe(
       'Rao, Asha',

@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
-export const text = z.string().trim().max(300);
+export const text = z
+  .string()
+  .trim()
+  .max(300)
+  .refine((v) => !/\p{Cc}/u.test(v), 'Remove control characters from this field.');
+const identifier = z.string().max(6000);
 export const sportUrl = z
   .string()
   .max(2000)
@@ -14,6 +19,9 @@ export const sportUrl = z
         !u.username &&
         !u.password &&
         !u.port &&
+        ![...u.searchParams.keys()].some((key) =>
+          /session|phpsessid|token|cookie|captcha|challenge|password|^sid$|^auth$/i.test(key),
+        ) &&
         (u.pathname.startsWith('/karate/') ||
           (u.pathname.startsWith('/setglinc/') && u.searchParams.get('system') === 'karate'))
       );
@@ -74,7 +82,7 @@ const links = { drawUrl: sportUrl, participantListUrl: sportUrl };
 const warnings = z.array(z.string().max(500)).max(40);
 export const entrySchema = z
   .object({
-    id: text,
+    id: identifier,
     studentName: text.min(1),
     normalizedStudentName: text.min(1),
     clubName: text,
@@ -90,7 +98,7 @@ export const entrySchema = z
 export type StudentEntry = z.infer<typeof entrySchema>;
 export const timetableSchema = z
   .object({
-    id: text,
+    id: identifier,
     ...category,
     eventDateISO: date,
     eventDateLabel: text,
@@ -204,7 +212,7 @@ export const workingSchema = z
     assignments: z.array(assignmentSchema).max(5000),
     rows: z.array(rowSchema).max(5000),
     overrides: z.record(z.string(), rowSchema),
-    excluded: z.array(text).max(5000),
+    excluded: z.array(identifier).max(5000),
     publish: publishMetaSchema.nullable(),
     captureWarnings: warnings,
     preferences: z.record(z.string(), z.string().max(300)),

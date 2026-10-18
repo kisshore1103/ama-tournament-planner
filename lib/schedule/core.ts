@@ -75,9 +75,8 @@ export const defaults: AppSettings = {
   upcomingThresholdMinutes: 60,
   defaultView: 'schedule',
   defaultSort: 'startDateTimeISO',
-  autoRefreshSeconds: Math.max(
-    30,
-    Math.min(60, Number(process.env.NEXT_PUBLIC_DEFAULT_AUTO_REFRESH_SECONDS) || 45),
+  autoRefreshSeconds: Math.round(
+    Math.max(30, Math.min(60, Number(process.env.NEXT_PUBLIC_DEFAULT_AUTO_REFRESH_SECONDS) || 45)),
   ),
 };
 export function newWorking(url: string, name: string, settings: AppSettings): WorkingData {

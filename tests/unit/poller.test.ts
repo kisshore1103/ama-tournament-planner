@@ -56,6 +56,20 @@ function poller(request: ReturnType<typeof vi.fn>, storage = cache()) {
   return { p, emit, storage };
 }
 describe('shared refresh', () => {
+  it('ends a timed-out request and enables a later retry', async () => {
+    const request = vi.fn(
+      (_input: unknown, options: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          options.signal?.addEventListener('abort', () => reject(new Error('timeout')));
+        }),
+    );
+    const { p } = poller(request);
+    const started = p.start();
+    await vi.advanceTimersByTimeAsync(12000);
+    await started;
+    expect(p.state.checking).toBe(false);
+    expect(p.state.message).toContain('Unable to check');
+  });
   it('calls the browser fetch with its global receiver', async () => {
     const request = vi.fn(function (this: unknown) {
       expect(this).toBe(globalThis);

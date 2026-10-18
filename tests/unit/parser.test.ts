@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { parsePage, safeSportLink, verificationDetected } from '@/lib/parser/dom';
+import { parsePage, safeSportLink, verificationDetected, visible } from '@/lib/parser/dom';
 import { capturePageSchema } from '@/lib/capture/schema';
 import { defaults } from '@/lib/schedule/core';
 const documentFor = (name: string) =>
@@ -15,6 +15,41 @@ const context = {
   timezone: 'America/Toronto',
 };
 describe('capture parser', () => {
+  it('skips content hidden by a CSS-styled ancestor', () => {
+    const style = document.createElement('style');
+    style.textContent = '.hidden-capture-fixture{display:none}';
+    document.head.append(style);
+    const parent = document.createElement('section');
+    parent.className = 'hidden-capture-fixture';
+    const child = document.createElement('p');
+    child.textContent = 'Hidden athlete';
+    parent.append(child);
+    document.body.append(parent);
+    expect(visible(child)).toBe(false);
+    parent.remove();
+    style.remove();
+  });
+  it('never relabels another SportData system as Karate', () =>
+    expect(
+      safeSportLink(
+        'https://sportdata.org/setglinc/dtm/dtm_timetable.php?eventid=90001&system=judo',
+        context.sourceUrl,
+      ),
+    ).toBe(''));
+  it('captures event metadata dates without raw HTML', () => {
+    const result = parsePage(documentFor('event'), context);
+    expect(result.eventDays).toEqual(['2026-10-18', '2026-10-19']);
+  });
+  it('uses an explicit source timezone and normalizes its day for the event display', () => {
+    const doc = new DOMParser().parseFromString(
+      '<h1>Timetable</h1><p>Timezone: UTC</p><table><tr><th>Date</th><th>Category</th><th>Start time</th><th>Tatami</th><th>Pool</th></tr><tr><td>2026-10-18</td><td>Kata</td><td>01:00</td><td>7</td><td>1</td></tr></table>',
+      'text/html',
+    );
+    const record = parsePage(doc, context).timetable[0];
+    expect(record.startDateTimeISO).toBe('2026-10-18T01:00:00.000Z');
+    expect(record.eventDateISO).toBe('2026-10-17');
+    expect(record.eventDateLabel).toBe('2026-10-18');
+  });
   it('blocks verification before parsing', () => {
     expect(verificationDetected(documentFor('verification'))).toBe(true);
     expect(() => parsePage(documentFor('verification'), context)).toThrow(

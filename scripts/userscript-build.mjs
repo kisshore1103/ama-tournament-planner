@@ -13,6 +13,7 @@ const result = await build({
   platform: 'browser',
   format: 'iife',
   target: 'es2022',
+  minify: true,
   banner: { js: banner },
   alias: { '@': '.' },
   define: {

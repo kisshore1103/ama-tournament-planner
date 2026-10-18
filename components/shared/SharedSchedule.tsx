@@ -5,9 +5,15 @@ import { Brand, ExternalLink } from '@/components/ui/Fields';
 import { db, cacheShared } from '@/lib/db/local';
 import { SchedulePoller, type RefreshState } from '@/lib/publish/poller';
 import { defaults, formatTime } from '@/lib/schedule/core';
+import { checkedLabel } from '@/lib/time/checked';
 export default function SharedSchedule({ shareId }: { shareId: string }) {
   const poller = useRef<SchedulePoller | null>(null);
   const [state, setState] = useState<RefreshState | null>(null);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 15000);
+    return () => clearInterval(timer);
+  }, []);
   useEffect(() => {
     const p = new SchedulePoller(
       shareId,
@@ -53,7 +59,7 @@ export default function SharedSchedule({ shareId }: { shareId: string }) {
               </>
             )}
             <p>
-              {state?.checkedAt ? 'Checked just now' : 'Not checked yet'}
+              {checkedLabel(state?.checkedAt || '', now)}
               {state?.checkedAt && (
                 <span>
                   {' '}
@@ -72,7 +78,10 @@ export default function SharedSchedule({ shareId }: { shareId: string }) {
                     : `On · Every ${defaults.autoRefreshSeconds} seconds`}
             </p>
           </div>
-          <button disabled={state?.checking} onClick={() => void poller.current?.refresh(true)}>
+          <button
+            disabled={!state || state.checking}
+            onClick={() => void poller.current?.refresh(true)}
+          >
             {state?.checking ? 'Checking for updates' : 'Refresh'}
           </button>
         </div>

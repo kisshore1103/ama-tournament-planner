@@ -6,7 +6,7 @@ A personal tournament-day planner for Arun Martial Arts coaches. Keep one workin
 
 ## Run locally
 
-1. Install the current Node.js LTS Windows installer from [nodejs.org](https://nodejs.org/en/download). Include npm in the installer options. Node 22 or later is required; this repository is being developed with Node 24.
+1. Install Node.js 24 LTS or later from [nodejs.org](https://nodejs.org/en/download). Include npm in the installer options. This repository is verified with Node 24.
 2. Open a terminal **inside this repository**. npm is included with Node; no global package-manager installation is needed.
 3. Run `npm.cmd ci` (on macOS/Linux, use `npm ci`).
 4. Run `npm.cmd run dev` and open `http://localhost:3000`.
@@ -83,3 +83,5 @@ Full setup, environment names, preview domains and troubleshooting: [Vercel and 
 The parser supports labelled tables, conservative timetable grids and text-based initial draw sections. Image/PDF/canvas brackets, unlabelled layouts, missing date context, ambiguous athlete names and unidentified team members require manual correction. Automated fixtures are synthetic; a live SportData layout is not assumed to have been verified. The app follows scheduled times, not live referee progress, and uses an explicit 30-minute activity estimate when an end time is absent. Notifications require an open page. Unpublishing cannot erase a copy another phone already downloaded while offline.
 
 Consult `STATUS.md` for executed verification and remaining external validation.
+
+The complete [source repository tree](docs/REPOSITORY_TREE.md) omits ignored caches and private test artifacts.

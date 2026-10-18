@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { installHelper } from '@/lib/capture/helper';
 const load = (name: string) => {
   document.body.innerHTML = readFileSync(`fixtures/sportdata/${name}.html`, 'utf8')
     .replace(/^[\s\S]*<body>/, '')
@@ -12,7 +13,6 @@ afterEach(() => {
   document.body.replaceChildren();
 });
 async function helper(fixture: string) {
-  vi.resetModules();
   load(fixture);
   vi.stubGlobal('location', {
     hostname: 'sportdata.org',
@@ -25,7 +25,7 @@ async function helper(fixture: string) {
   vi.stubGlobal('GM_setValue', save);
   vi.stubGlobal('GM_getValue', (key: string, fallback: unknown) => storage.get(key) || fallback);
   vi.stubGlobal('GM_deleteValue', (key: string) => storage.delete(key));
-  await import('@/lib/capture/helper');
+  installHelper();
   const control = document.getElementById('ama-capture-control') as HTMLDetailsElement;
   return { control, save };
 }

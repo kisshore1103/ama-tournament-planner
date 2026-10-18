@@ -89,6 +89,7 @@ export function importCapture(value: string, data: WorkingData, sourceUrl?: stri
       captureWarnings: [...new Set([...next.captureWarnings, ...page.warnings])].slice(-40),
       tournament: {
         ...next.tournament,
+        eventDays: [...new Set([...next.tournament.eventDays, ...page.eventDays])].sort(),
         eventName:
           page.type === 'event' && page.eventName ? page.eventName : next.tournament.eventName,
         lastCapturedAt: page.capturedAt,

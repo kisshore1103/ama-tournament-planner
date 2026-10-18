@@ -14,6 +14,10 @@ export const capturePageSchema = z
     schemaVersion: z.literal(1),
     eventId: z.string().regex(/^[1-9]\d{0,11}$/),
     eventName: z.string().max(300),
+    eventDays: z
+      .array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/))
+      .max(60)
+      .default([]),
     sourceUrl: sportUrl,
     type: captureType,
     capturedAt: z.string().datetime(),

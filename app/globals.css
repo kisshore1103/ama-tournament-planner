@@ -814,9 +814,13 @@ dialog svg {
   font-size: 14px;
 }
 .qr-large {
-  width: 94vw;
-  max-width: 94vw;
+  width: 100vw;
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  border-radius: 0;
 }
 .qr-large svg {
-  width: min(70vw, 650px);
+  width: min(80vw, 650px);
 }
