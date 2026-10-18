@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import { defaults, newWorking, makeRow } from '@/lib/schedule/core';
 import { parsePage } from '@/lib/parser/dom';
-import { generateSchedule } from '@/lib/schedule/mapping';
+import { generateSchedule, addTimetable, updateSettings } from '@/lib/schedule/mapping';
 import { importCapture } from '@/lib/capture/import';
 const source = 'https://sportdata.org/karate/set-online/draw.php?vernr=90001&catid=11';
 const page = (name: string) =>
@@ -29,6 +29,39 @@ function working() {
   return data;
 }
 describe('exact initial pool mapping', () => {
+  it('reopens review when a second manual slot makes an earlier single-slot mapping ambiguous', () => {
+    let data = working();
+    data.entries = [];
+    data.timetable = [];
+    const row = makeRow(
+      { studentName: 'Asha Rao', categoryName: 'U12 Kata', categoryId: '11' },
+      data.tournament,
+    );
+    data.rows = [row];
+    data.overrides[row.id] = row;
+    const slots = page('timetable').timetable;
+    data = addTimetable(data, { ...slots[0], totalPools: '1' });
+    expect(data.rows[0].tatami).toBe('3');
+    data = addTimetable(data, slots[1]);
+    expect(data.rows[0].requiresReview).toBe(true);
+    expect(data.rows[0].tatami).toBe('');
+  });
+  it('preserves capture mapping when only settings thresholds change', () => {
+    const data = generateSchedule(working());
+    const next = updateSettings(
+      data,
+      { ...data.settings, upcomingThresholdMinutes: 90 },
+      'Renamed',
+    );
+    expect(next.overrides).toEqual(data.overrides);
+    expect(next.entries).toEqual(data.entries);
+    expect(next.tournament.eventName).toBe('Renamed');
+  });
+  it('reinterprets local times on a timezone correction', () => {
+    const data = generateSchedule(working());
+    const next = updateSettings(data, { ...data.settings, eventTimezone: 'Asia/Kolkata' }, 'Cup');
+    expect(next.timetable[0].startDateTimeISO).toBe('2026-10-18T03:25:00.000Z');
+  });
   it('maps athlete pool 2 to Tatami 7 at its own later start', () => {
     const data = working();
     data.assignments = page('draw').assignments;

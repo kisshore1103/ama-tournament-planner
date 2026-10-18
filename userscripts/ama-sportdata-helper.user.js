@@ -2289,7 +2289,10 @@
   }
   function normalizeClub(value) {
     return normalize(
-      value.replace(/\[\d+\]\s*$/, "").replace(/(?:\s*[-,]\s*|\s*\()(?:IND|INDIA|CAN|CANADA|USA|GBR|UK)\)?\s*$/i, "")
+      value.replace(
+        /(?:\s*[-,]\s*|\s*\()(?:IND|INDIA|CAN|CANADA|USA|GBR|UK|LKA|SRI|NPL|NEP|BGD|AUS|NZL|ARE|UAE|QAT|SAU|SGP|SIN|MYS|MAS|JPN|KOR|DEU|GER|FRA|ITA|ESP|PRT|POR|NLD|NED|BEL|SWE|NOR|FIN|DNK|POL|ZAF|RSA|BRA|MEX|IRL|ENG|PAK)\)?\s*$/i,
+        ""
+      ).replace(/\[\d+\]\s*$/, "")
     );
   }
   function matchClub(value, aliases) {
@@ -2505,9 +2508,25 @@
     const sourceUrl = safeSportLink(context.sourceUrl, context.sourceUrl);
     if (!sourceUrl || !/^[1-9]\d{0,11}$/.test(context.eventId))
       throw new Error("A valid SportData source URL and event ID are required.");
+    const sourceParams = new URL(sourceUrl).searchParams;
+    const sourceEvent = sourceParams.get("vernr") || sourceParams.get("eventid") || sourceParams.get("verid");
+    if (sourceEvent && sourceEvent !== context.eventId)
+      throw new Error("Source event ID does not match the capture event.");
     const type = context.type || detectPageType(doc);
     const entries = [], timetable = [], assignments = [], warnings2 = [];
     const eventName = txt(doc.querySelector("[data-event-name]")) || txt(doc.querySelector("h1")) || doc.title.slice(0, 300);
+    let eventTimezone = context.timezone;
+    const timezoneText = Array.from(doc.querySelectorAll("[data-timezone],h1,h2,h3,p")).filter(visible).map(
+      (el) => el.getAttribute("data-timezone") || txt(el).match(/time\s*zone\s*:\s*([A-Za-z_]+(?:\/[A-Za-z_+-]+)+|UTC|GMT)\b/i)?.[1]
+    ).find(Boolean);
+    if (timezoneText) {
+      try {
+        new Intl.DateTimeFormat("en", { timeZone: timezoneText });
+        eventTimezone = timezoneText;
+      } catch {
+        warnings2.push("Source timezone not recognized. Confirm date/time manually.");
+      }
+    }
     const tables = Array.from(doc.querySelectorAll("table")).filter(visible);
     for (const table of tables) {
       const { headers, rows } = tableData(table);
@@ -2592,8 +2611,8 @@
           const rowWarnings = [];
           let startDateTimeISO = "", endDateTimeISO = "";
           try {
-            startDateTimeISO = localISO(eventDateISO, timeFrom(startTimeDisplay), context.timezone);
-            endDateTimeISO = localISO(eventDateISO, timeFrom(endTimeDisplay), context.timezone);
+            startDateTimeISO = localISO(eventDateISO, timeFrom(startTimeDisplay), eventTimezone);
+            endDateTimeISO = localISO(eventDateISO, timeFrom(endTimeDisplay), eventTimezone);
             if (startDateTimeISO && endDateTimeISO && endDateTimeISO <= startDateTimeISO) {
               endDateTimeISO = "";
               rowWarnings.push("End time is not after start time. Correct it manually.");

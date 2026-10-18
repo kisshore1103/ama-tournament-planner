@@ -7,6 +7,104 @@ import type {
 } from '@/lib/validation/models';
 import { makeRow, normalize, normalizeName, rowId, chronological } from './core';
 import { laterPhase } from '@/lib/parser/dom';
+import { formatInTimeZone } from 'date-fns-tz';
+import { localISO } from './core';
+import type { AppSettings } from '@/lib/validation/models';
+
+export function addTimetable(data: WorkingData, slot: TimetableRecord): WorkingData {
+  const next = {
+    ...data,
+    entries: [...data.entries],
+    assignments: [...data.assignments],
+    overrides: { ...data.overrides },
+    timetable: [...data.timetable, slot],
+  };
+  for (const row of data.rows) {
+    if (!row.manualOverride || !row.requiresReview) continue;
+    if (
+      !next.entries.some(
+        (e) =>
+          rowId(data.tournament.eventId, e.studentName, e.categoryId, e.categoryName) === row.id,
+      )
+    )
+      next.entries.push({
+        id: row.id,
+        studentName: row.studentName,
+        normalizedStudentName: row.normalizedStudentName,
+        clubName: row.clubName,
+        country: '',
+        entryType: row.entryType,
+        categoryId: row.categoryId,
+        categoryCode: row.categoryCode,
+        categoryName: row.categoryName,
+        drawUrl: row.drawUrl,
+        participantListUrl: row.participantListUrl,
+        sourceUrl: data.tournament.tournamentUrl,
+        warnings: [],
+        requiresReview: false,
+      });
+    if (row.pool)
+      next.assignments.push({
+        studentName: row.studentName,
+        normalizedStudentName: row.normalizedStudentName,
+        categoryId: row.categoryId,
+        categoryName: row.categoryName,
+        pool: row.pool,
+        matchedName: row.studentName,
+        confidence: 1,
+        matchingReason: 'Pool explicitly entered by organizer',
+        drawUrl: row.drawUrl,
+        sourceHeading: 'Manual initial pool',
+        warnings: [],
+        requiresReview: false,
+      });
+    delete next.overrides[row.id];
+  }
+  return generateSchedule(next);
+}
+export function updateSettings(
+  data: WorkingData,
+  settings: AppSettings,
+  eventName: string,
+): WorkingData {
+  const tournament = {
+    ...data.tournament,
+    eventName: eventName || data.tournament.eventName,
+    eventTimezone: settings.eventTimezone,
+  };
+  if (settings.eventTimezone === data.settings.eventTimezone)
+    return { ...data, settings, tournament };
+  const retime = <
+    T extends Pick<TimetableRecord, 'eventDateISO' | 'startDateTimeISO' | 'endDateTimeISO'>,
+  >(
+    r: T,
+  ): T => ({
+    ...r,
+    startDateTimeISO: localISO(
+      r.eventDateISO,
+      r.startDateTimeISO
+        ? formatInTimeZone(r.startDateTimeISO, data.settings.eventTimezone, 'HH:mm')
+        : '',
+      settings.eventTimezone,
+    ),
+    endDateTimeISO: localISO(
+      r.eventDateISO,
+      r.endDateTimeISO
+        ? formatInTimeZone(r.endDateTimeISO, data.settings.eventTimezone, 'HH:mm')
+        : '',
+      settings.eventTimezone,
+    ),
+  });
+  return generateSchedule({
+    ...data,
+    settings,
+    tournament,
+    timetable: data.timetable.map(retime),
+    overrides: Object.fromEntries(
+      Object.entries(data.overrides).map(([id, row]) => [id, retime(row)]),
+    ),
+  });
+}
 
 function categoryMatches(
   entry: Pick<StudentEntry, 'categoryId' | 'categoryName'>,

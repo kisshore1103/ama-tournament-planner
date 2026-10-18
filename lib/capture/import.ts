@@ -2,6 +2,7 @@ import { capturePageSchema, captureSessionSchema, type CapturePage } from './sch
 import { workingSchema, type WorkingData } from '@/lib/validation/models';
 import { parsePage } from '@/lib/parser/dom';
 import { generateSchedule } from '@/lib/schedule/mapping';
+import { matchClub } from '@/lib/schedule/core';
 
 export function isCapture(value: string) {
   try {
@@ -56,18 +57,7 @@ export function importCapture(value: string, data: WorkingData, sourceUrl?: stri
     if (sourceEvent && sourceEvent !== page.eventId)
       throw new Error('Capture source event does not match the current tournament.');
     const importedEntries = page.entries.filter(
-      (e) =>
-        e.clubName &&
-        data.settings.clubAliases.some((alias) => {
-          const n = (s: string) =>
-            s
-              .normalize('NFKC')
-              .toLowerCase()
-              .replace(/\[\d+\]\s*$/, '')
-              .replace(/(?:\s*[-,]\s*|\s*\()(?:ind|india|can|canada|usa|gbr|uk)\)?\s*$/i, '')
-              .replace(/[^\p{L}\p{N}]/gu, '');
-          return n(alias) === n(e.clubName);
-        }),
+      (e) => matchClub(e.clubName, data.settings.clubAliases).matches,
     );
     if (page.type === 'entries')
       next.entries = next.entries.filter((e) => e.sourceUrl !== page.sourceUrl);

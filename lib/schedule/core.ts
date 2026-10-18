@@ -19,8 +19,11 @@ export function normalizeName(value: string): string {
 export function normalizeClub(value: string): string {
   return normalize(
     value
-      .replace(/\[\d+\]\s*$/, '')
-      .replace(/(?:\s*[-,]\s*|\s*\()(?:IND|INDIA|CAN|CANADA|USA|GBR|UK)\)?\s*$/i, ''),
+      .replace(
+        /(?:\s*[-,]\s*|\s*\()(?:IND|INDIA|CAN|CANADA|USA|GBR|UK|LKA|SRI|NPL|NEP|BGD|AUS|NZL|ARE|UAE|QAT|SAU|SGP|SIN|MYS|MAS|JPN|KOR|DEU|GER|FRA|ITA|ESP|PRT|POR|NLD|NED|BEL|SWE|NOR|FIN|DNK|POL|ZAF|RSA|BRA|MEX|IRL|ENG|PAK)\)?\s*$/i,
+        '',
+      )
+      .replace(/\[\d+\]\s*$/, ''),
   );
 }
 export function matchClub(value: string, aliases: string[]) {

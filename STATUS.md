@@ -11,8 +11,8 @@ Authoritative scope: `BUILD_PROMPT.md`. See `IMPLEMENTATION_PLAN.md` for section
 - [x] Phase 1 Git checkpoint (see Git log).
 - [x] Phase 2: explicit capture helper, entries/timetable parser, guided imports and sanitized fixtures.
 - [x] Phase 2 checks and Git checkpoint: 49 unit/integration tests, 6 mobile/desktop Playwright journeys, lint, TypeScript, userscript checks and production build passed. The helper startup test uses a 15-second timeout on Windows.
-- [ ] Phase 3: exact initial-pool mapping, review/manual corrections and later-round context.
-- [ ] Phase 3 checks and Git checkpoint.
+- [x] Phase 3: exact initial-pool mapping, review/manual corrections and Possible Later Rounds.
+- [x] Phase 3 checks and Git checkpoint: 52 unit/integration tests, 6 phone/desktop journeys, formatting, lint, strict TypeScript, userscript checks and production build passed.
 - [ ] Phase 4: secure API, publication lifecycle, sharing/recovery and read-only offline-refresh view.
 - [ ] Phase 4 checks and Git checkpoint.
 - [ ] Phase 5: complete documentation, security/accessibility review and automated coverage.

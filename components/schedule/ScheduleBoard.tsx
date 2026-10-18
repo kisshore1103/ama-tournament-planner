@@ -110,12 +110,16 @@ export default function ScheduleBoard({
     () => [
       { accessorKey: 'eventDateISO', header: 'Date' },
       {
-        accessorKey: 'startDateTimeISO',
+        id: 'startDateTimeISO',
+        accessorFn: (row) => row.startDateTimeISO || undefined,
+        sortUndefined: 'last',
         header: 'Start',
         cell: (c) => formatTime(c.row.original.startDateTimeISO, zone),
       },
       {
-        accessorKey: 'endDateTimeISO',
+        id: 'endDateTimeISO',
+        accessorFn: (row) => row.endDateTimeISO || undefined,
+        sortUndefined: 'last',
         header: 'End',
         cell: (c) =>
           c.row.original.endDateTimeISO ? formatTime(c.row.original.endDateTimeISO, zone) : '—',
@@ -495,8 +499,11 @@ export default function ScheduleBoard({
           </>
         )}
         {view === 'students' &&
-          [...new Set(sorted.map((r) => r.studentName))].sort().map((name) => {
-            const own = sorted.filter((r) => r.studentName === name).sort(chronological);
+          [...new Set(sorted.map((r) => r.normalizedStudentName))].sort().map((studentKey) => {
+            const own = sorted
+              .filter((r) => r.normalizedStudentName === studentKey)
+              .sort(chronological);
+            const name = own[0].studentName;
             const upcoming = own.find((r) => Date.parse(r.startDateTimeISO) >= now);
             return (
               <section key={name} className="student-group">

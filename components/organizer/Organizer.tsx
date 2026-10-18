@@ -7,7 +7,6 @@ import {
   formatTime,
   newWorking,
   normalizeClub,
-  makeRow,
 } from '@/lib/schedule/core';
 import {
   settingsSchema,
@@ -21,7 +20,7 @@ import ScheduleBoard from '@/components/schedule/ScheduleBoard';
 import EntryForm from './EntryForm';
 import CaptureWorkflow from './CaptureWorkflow';
 import { importCapture, isCapture } from '@/lib/capture/import';
-import { generateSchedule } from '@/lib/schedule/mapping';
+import { generateSchedule, addTimetable, updateSettings } from '@/lib/schedule/mapping';
 
 export default function Organizer() {
   const [data, setData] = useState<WorkingData | null>(null),
@@ -106,6 +105,14 @@ export default function Organizer() {
   async function saveEntry(value: ScheduleRow | TimetableRecord) {
     if (!data) return;
     if ('studentName' in value) {
+      value = {
+        ...value,
+        clubName: data.settings.clubDisplayName,
+        possibleLaterRounds:
+          editing?.categoryId === value.categoryId
+            ? editing.possibleLaterRounds
+            : value.possibleLaterRounds,
+      };
       if (data.rows.some((r) => r.id === value.id && r.id !== editing?.id))
         throw new Error('Duplicate Student + Category. Edit the existing row.');
       const rows = [...data.rows.filter((r) => r.id !== editing?.id), value];
@@ -116,7 +123,12 @@ export default function Organizer() {
         ...data,
         rows,
         overrides,
-        excluded: data.excluded.filter((id) => id !== value.id),
+        excluded: [
+          ...new Set([
+            ...data.excluded.filter((id) => id !== value.id),
+            ...(editing && editing.id !== value.id ? [editing.id] : []),
+          ]),
+        ],
         tournament: {
           ...data.tournament,
           eventDays: [...new Set(rows.map((r) => r.eventDateISO).filter(Boolean))].sort(),
@@ -124,38 +136,7 @@ export default function Organizer() {
         },
       });
     } else {
-      const rows = data.rows.map((r) => {
-        if (
-          ((r.categoryId && r.categoryId === value.categoryId) ||
-            (!r.categoryId && r.categoryName === value.categoryName)) &&
-          (!r.pool || r.pool === value.pool) &&
-          !r.startDateTimeISO
-        )
-          return {
-            ...r,
-            ...value,
-            id: r.id,
-            manualOverride: true,
-            requiresReview: !value.startDateTimeISO || !value.tatami || !value.pool,
-            status: 'Upcoming',
-          };
-        return r;
-      });
-      await persist({
-        ...data,
-        timetable: [...data.timetable, value],
-        rows,
-        overrides: {
-          ...data.overrides,
-          ...Object.fromEntries(rows.filter((r) => r.manualOverride).map((r) => [r.id, r])),
-        },
-        tournament: {
-          ...data.tournament,
-          eventDays: [
-            ...new Set([...data.tournament.eventDays, value.eventDateISO].filter(Boolean)),
-          ].sort(),
-        },
-      });
+      await persist(addTimetable(data, value));
     }
     setPanel('');
     setEditing(undefined);
@@ -260,34 +241,7 @@ export default function Organizer() {
                 });
                 let working: WorkingData;
                 if (panel === 'settings' && data) {
-                  const rows = data.rows.map((r) =>
-                    makeRow(
-                      {
-                        studentName: r.studentName,
-                        categoryName: r.categoryName,
-                        categoryId: r.categoryId,
-                        categoryCode: r.categoryCode,
-                        pool: r.pool,
-                        tatami: r.tatami,
-                        eventDate: r.eventDateISO,
-                        startTime: r.startTimeDisplay,
-                        endTime: r.endTimeDisplay,
-                        drawUrl: r.drawUrl,
-                      },
-                      { ...data.tournament, eventTimezone: settings.eventTimezone },
-                    ),
-                  );
-                  working = {
-                    ...data,
-                    settings,
-                    rows,
-                    overrides: Object.fromEntries(rows.map((r) => [r.id, r])),
-                    tournament: {
-                      ...data.tournament,
-                      eventName: f.name || data.tournament.eventName,
-                      eventTimezone: settings.eventTimezone,
-                    },
-                  };
+                  working = updateSettings(data, settings, f.name);
                   await persist(working);
                 } else {
                   working = newWorking(f.url, f.name, settings);
