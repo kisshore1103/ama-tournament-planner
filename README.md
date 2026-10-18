@@ -42,4 +42,44 @@ npm.cmd run build
 
 `npm.cmd run format` applies formatting; `npm.cmd run test:watch` runs unit tests interactively. Dependency and browser caches stay in this repository. Tests use sanitized fixtures and never request live SportData pages.
 
-Deployment, phone capture and sharing guides are added in the corresponding implementation phases. Consult `STATUS.md` for what has actually passed verification.
+## Capture from SportData
+
+Open **Capture / Refresh Data**, then install the helper from its link. In Firefox Android, install Firefox, add Tampermonkey from Extensions, open the helper link and choose Install. If the manager does not intercept the link, create a new script in its dashboard, paste the generated `.user.js` file and save. No Mozilla account is required.
+
+Open SportData normally and complete verification yourself. Capture the entries page, manually select and capture every timetable day, and capture only relevant category draws needed for unknown initial pools. In the helper, download `.ama-capture.json` or copy its normalized JSON. Return to **Import / Export** and import it. You can also import saved HTML locally. Use **Review** to correct a pool, Tatami, time or draw URL, then **Generate schedule** and use **Now and Next**. Finals and repechage appear only as possible later rounds.
+
+See [the capture walkthrough](docs/CAPTURE_WORKFLOW.md) and [phone setup](docs/PHONE_SETUP.md) for exact steps, installation and offline checks.
+
+## Publish and share
+
+Select **Publish Schedule**. Review items are visibly excluded; only resolved normalized rows are uploaded. Use **Copy Sharing Link**, **Share through WhatsApp**, native **Share**, **Show QR Code**, or **Open Shared View**. The local QR code contains only the public read-only link. A colleague opens it in a normal browser without an account or helper. The page shows the actual publication time, checks every 45 seconds while visible and online, offers **Refresh**, and retains a validated offline copy.
+
+After a correction, select **Update Published Schedule** to keep the same URL. Select **Unpublish Schedule** and confirm to remove cloud access while keeping the working copy. Under **WhatsApp message and private recovery**, use **Export Organizer Recovery File**; keep that file private. On another trusted organizer device, save the same event and use **Import Organizer Recovery File**. The public schedule export does not contain the edit token.
+
+**Change Tournament** asks for confirmation, invalidates the existing publication, and replaces the old local data only after the new tournament is saved. If invalidation fails, the app keeps the current tournament. No tournament history is retained. Read [sharing and privacy](docs/SHARING_AND_PRIVACY.md) before clearing browser storage.
+
+## Deploy to Vercel Hobby
+
+1. Sign in to GitHub, create an empty repository if needed, connect its HTTPS remote in this repository and run `git push -u origin main`. Preserve any existing remote; do not commit secrets.
+2. Sign in to Vercel, select **Add New → Project**, import that repository, select Next.js and use its root directory. The committed configuration runs `npm ci` and `npm run build`.
+3. In Vercel Marketplace, add **Upstash Redis**, create a database and connect it to the project. This is an account/billing action for the owner.
+4. In Vercel project environment settings, set `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` and `NEXT_PUBLIC_APP_URL=https://YOUR-PROJECT.vercel.app`. The first two must remain server-only. Set the applicable Production/Preview scopes.
+5. Deploy or redeploy, then open the HTTPS site, publish a small test schedule, open it on another phone, update it and unpublish it. Install the PWA and test an offline reload.
+
+Full setup, environment names, preview domains and troubleshooting: [Vercel and Upstash deployment](docs/VERCEL_DEPLOYMENT.md). This repository does not provision external accounts or claim a live deployment without those owner actions.
+
+## Guides and limits
+
+| Guide                                              | Purpose                                                            |
+| -------------------------------------------------- | ------------------------------------------------------------------ |
+| [Architecture](docs/ARCHITECTURE.md)               | Storage, parsing, service and security boundaries                  |
+| [Phone setup](docs/PHONE_SETUP.md)                 | Firefox, userscript manager, helper and PWA installation           |
+| [Capture workflow](docs/CAPTURE_WORKFLOW.md)       | First tournament, timetable days, pool review and manual fallbacks |
+| [Deployment](docs/VERCEL_DEPLOYMENT.md)            | GitHub, Vercel Hobby, Upstash and environment values               |
+| [Troubleshooting](docs/TROUBLESHOOTING.md)         | Import, storage, verification, publishing and offline errors       |
+| [Parser maintenance](docs/PARSER_MAINTENANCE.md)   | Selectors, sanitized fixtures and safe matching changes            |
+| [Sharing and privacy](docs/SHARING_AND_PRIVACY.md) | Publishing, WhatsApp/QR, recovery and device limitations           |
+
+The parser supports labelled tables, conservative timetable grids and text-based initial draw sections. Image/PDF/canvas brackets, unlabelled layouts, missing date context, ambiguous athlete names and unidentified team members require manual correction. Automated fixtures are synthetic; a live SportData layout is not assumed to have been verified. The app follows scheduled times, not live referee progress, and uses an explicit 30-minute activity estimate when an end time is absent. Notifications require an open page. Unpublishing cannot erase a copy another phone already downloaded while offline.
+
+Consult `STATUS.md` for executed verification and remaining external validation.

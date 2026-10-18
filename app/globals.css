@@ -804,3 +804,19 @@ dialog svg {
 .review-item ul {
   padding-left: 20px;
 }
+.secondary-link {
+  display: inline-flex;
+  align-items: center;
+  background: white;
+  color: var(--ink);
+  border-color: var(--line);
+  text-decoration: none;
+  font-size: 14px;
+}
+.qr-large {
+  width: 94vw;
+  max-width: 94vw;
+}
+.qr-large svg {
+  width: min(70vw, 650px);
+}

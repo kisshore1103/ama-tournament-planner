@@ -29,7 +29,18 @@ const serwist = new Serwist({
     },
   ],
   fallbacks: {
-    entries: [{ url: '/offline', matcher: ({ request }) => request.destination === 'document' }],
+    entries: [
+      {
+        url: '/shared-offline',
+        matcher: ({ request }) =>
+          request.destination === 'document' && new URL(request.url).pathname.startsWith('/s/'),
+      },
+      {
+        url: '/offline',
+        matcher: ({ request }) =>
+          request.destination === 'document' && !new URL(request.url).pathname.startsWith('/s/'),
+      },
+    ],
   },
 });
 serwist.addEventListeners();

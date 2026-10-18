@@ -13,12 +13,15 @@ import {
   type ScheduleRow,
   type WorkingData,
   type TimetableRecord,
+  type PublishMeta,
 } from '@/lib/validation/models';
 import { copyText, download, eventDetails, importRows, toCSV, toICS } from '@/lib/export/files';
 import { Brand, ExternalLink, Field } from '@/components/ui/Fields';
 import ScheduleBoard from '@/components/schedule/ScheduleBoard';
 import EntryForm from './EntryForm';
 import CaptureWorkflow from './CaptureWorkflow';
+import SharingPanel from './SharingPanel';
+import { unpublish } from '@/lib/publish/client';
 import { importCapture, isCapture } from '@/lib/capture/import';
 import { generateSchedule, addTimetable, updateSettings } from '@/lib/schedule/mapping';
 
@@ -36,6 +39,7 @@ export default function Organizer() {
     notified = useRef(new Set<string>());
   const [notifications, setNotifications] = useState(false);
   const [sourceUrl, setSourceUrl] = useState('');
+  const [cloudBusy, setCloudBusy] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 15000);
@@ -76,6 +80,12 @@ export default function Organizer() {
         void persist({ ...d, preferences: p }).catch(() =>
           setMessage('Could not save view preferences.'),
         );
+    },
+    [persist],
+  );
+  const setMetadata = useCallback(
+    async (meta: PublishMeta | null) => {
+      if (current.current) await persist({ ...current.current, publish: meta });
     },
     [persist],
   );
@@ -532,6 +542,13 @@ export default function Organizer() {
                 }
               }}
             />
+            <SharingPanel
+              data={data}
+              onMetadata={setMetadata}
+              onRecovery={persist}
+              onBusy={setCloudBusy}
+              onMessage={setMessage}
+            />
             <section className="panel utility-panel">
               <h2>Tournament tools</h2>
               <div className="actions">
@@ -560,15 +577,27 @@ export default function Organizer() {
                 </button>
                 <button
                   className="quiet danger"
-                  onClick={() => {
+                  disabled={cloudBusy}
+                  onClick={async () => {
                     if (
                       confirm(
                         'Change tournament? Previous entries, captures, corrections and schedule will be removed. No history is kept.',
                       )
                     ) {
-                      if (data.publish)
-                        setMessage('Unpublish the current schedule before changing tournament.');
-                      else setChanging(true);
+                      try {
+                        if (data.publish) {
+                          await unpublish(data.publish);
+                          await setMetadata(null);
+                        }
+                        setChanging(true);
+                        setPanel('');
+                      } catch (error) {
+                        setMessage(
+                          error instanceof Error
+                            ? error.message
+                            : 'Could not invalidate the old share link. Current tournament kept.',
+                        );
+                      }
                     }
                   }}
                 >

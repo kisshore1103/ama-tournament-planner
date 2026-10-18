@@ -13,8 +13,8 @@ Authoritative scope: `BUILD_PROMPT.md`. See `IMPLEMENTATION_PLAN.md` for section
 - [x] Phase 2 checks and Git checkpoint: 49 unit/integration tests, 6 mobile/desktop Playwright journeys, lint, TypeScript, userscript checks and production build passed. The helper startup test uses a 15-second timeout on Windows.
 - [x] Phase 3: exact initial-pool mapping, review/manual corrections and Possible Later Rounds.
 - [x] Phase 3 checks and Git checkpoint: 52 unit/integration tests, 6 phone/desktop journeys, formatting, lint, strict TypeScript, userscript checks and production build passed.
-- [ ] Phase 4: secure API, publication lifecycle, sharing/recovery and read-only offline-refresh view.
-- [ ] Phase 4 checks and Git checkpoint.
+- [x] Phase 4: secure API, publication lifecycle, sharing/recovery and read-only offline-refresh view.
+- [x] Phase 4 checks and Git checkpoint: 79 unit/integration tests, 12 mobile/desktop journeys, lint, strict TypeScript, formatting, userscript checks and production build passed. Real Upstash connectivity remains an owner-account smoke test.
 - [ ] Phase 5: complete documentation, security/accessibility review and automated coverage.
 - [ ] Formatting check.
 - [ ] ESLint.
@@ -40,3 +40,4 @@ Authoritative scope: `BUILD_PROMPT.md`. See `IMPLEMENTATION_PLAN.md` for section
 - Phase 1 is locally verified. Prepared parser/helper/mapping modules and synthetic fixtures are included in this checkpoint; their guided organizer integration is next.
 - One interrupted dependency installation was repaired with a clean repository-local reinstall. Dependency lockfile and repository-local browser/cache configuration are present.
 - First Playwright run exposed a select-label locator mismatch; corrected to an accessible combobox-role locator. All four organizer scenarios then passed.
+- Sharing browser coverage found and fixed an unbound native browser fetch call; a receiver-binding regression test now covers it. Full sharing, polling, offline reload, recovery and tournament invalidation journeys pass locally.

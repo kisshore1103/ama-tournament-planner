@@ -3,6 +3,7 @@ import type { ScheduleRow, Tournament, TimetableRecord } from '@/lib/validation/
 import { makeRow } from '@/lib/schedule/core';
 import { rowSchema, timetableSchema } from '@/lib/validation/models';
 import { Field } from '@/components/ui/Fields';
+import { formatInTimeZone } from 'date-fns-tz';
 
 export default function EntryForm({
   tournament,
@@ -122,9 +123,22 @@ export default function EntryForm({
           label="Start time"
           type="time"
           name="startTime"
-          defaultValue={row?.startTimeDisplay}
+          defaultValue={
+            row?.startDateTimeISO
+              ? formatInTimeZone(row.startDateTimeISO, tournament.eventTimezone, 'HH:mm')
+              : ''
+          }
         />
-        <Field label="End time" type="time" name="endTime" defaultValue={row?.endTimeDisplay} />
+        <Field
+          label="End time"
+          type="time"
+          name="endTime"
+          defaultValue={
+            row?.endDateTimeISO
+              ? formatInTimeZone(row.endDateTimeISO, tournament.eventTimezone, 'HH:mm')
+              : ''
+          }
+        />
         <Field label="Pool" name="pool" defaultValue={row?.pool} />
         <Field label="Tatami" name="tatami" defaultValue={row?.tatami} />
         <Field label="Total pools" name="totalPools" defaultValue={row?.totalPools} />

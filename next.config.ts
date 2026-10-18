@@ -7,6 +7,10 @@ const withSerwist = withSerwistInit({
   disable: process.env.NODE_ENV === 'development',
   additionalPrecacheEntries: [
     { url: '/offline', revision: process.env.VERCEL_GIT_COMMIT_SHA || new Date().toISOString() },
+    {
+      url: '/shared-offline',
+      revision: process.env.VERCEL_GIT_COMMIT_SHA || new Date().toISOString(),
+    },
   ],
 });
 const config: NextConfig = {
