@@ -9,8 +9,8 @@ Authoritative scope: `BUILD_PROMPT.md`. See `IMPLEMENTATION_PLAN.md` for section
 - [x] Phase 1: runnable manual organizer, single-tournament persistence, views, imports/exports and production PWA shell.
 - [x] Phase 1 checks: formatting, lint, strict TypeScript, 46 unit/integration tests, userscript guard checks, production build and 4 mobile/desktop Playwright journeys. Dedicated offline browser scenarios remain in the final hardening suite.
 - [x] Phase 1 Git checkpoint (see Git log).
-- [ ] Phase 2: explicit capture helper, entries/timetable parser, guided imports and sanitized fixtures.
-- [ ] Phase 2 checks and Git checkpoint.
+- [x] Phase 2: explicit capture helper, entries/timetable parser, guided imports and sanitized fixtures.
+- [x] Phase 2 checks and Git checkpoint: 49 unit/integration tests, 6 mobile/desktop Playwright journeys, lint, TypeScript, userscript checks and production build passed. The helper startup test uses a 15-second timeout on Windows.
 - [ ] Phase 3: exact initial-pool mapping, review/manual corrections and later-round context.
 - [ ] Phase 3 checks and Git checkpoint.
 - [ ] Phase 4: secure API, publication lifecycle, sharing/recovery and read-only offline-refresh view.

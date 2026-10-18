@@ -11,3 +11,4 @@ userscripts/ama-sportdata-helper.user.js
 test-results
 playwright-report
 coverage
+next-env.d.ts

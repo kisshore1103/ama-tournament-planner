@@ -19,6 +19,9 @@ import { copyText, download, eventDetails, importRows, toCSV, toICS } from '@/li
 import { Brand, ExternalLink, Field } from '@/components/ui/Fields';
 import ScheduleBoard from '@/components/schedule/ScheduleBoard';
 import EntryForm from './EntryForm';
+import CaptureWorkflow from './CaptureWorkflow';
+import { importCapture, isCapture } from '@/lib/capture/import';
+import { generateSchedule } from '@/lib/schedule/mapping';
 
 export default function Organizer() {
   const [data, setData] = useState<WorkingData | null>(null),
@@ -33,6 +36,7 @@ export default function Organizer() {
     writeQueue = useRef(Promise.resolve()),
     notified = useRef(new Set<string>());
   const [notifications, setNotifications] = useState(false);
+  const [sourceUrl, setSourceUrl] = useState('');
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 15000);
@@ -160,6 +164,15 @@ export default function Organizer() {
   async function doImport() {
     if (!data) return;
     try {
+      if (isCapture(importText) || /^\s*</.test(importText)) {
+        const next = importCapture(importText, data, sourceUrl || undefined);
+        await persist(next);
+        setMessage(
+          `Capture imported. ${next.rows.length} entries generated; ${next.rows.filter((r) => r.requiresReview).length} require review.`,
+        );
+        setImportText('');
+        return;
+      }
       const imported = importRows(importText, data.tournament);
       const ids = new Set<string>();
       for (const row of imported) {
@@ -437,36 +450,29 @@ export default function Organizer() {
               />
             )}
             {panel === 'capture' && (
-              <section className="panel">
-                <h2>Guided capture</h2>
-                <p>
-                  Open each page normally and complete SportData verification if requested. Capture
-                  only after the page loads.
-                </p>
-                <ol>
-                  <li>Confirm the tournament and club in Settings.</li>
-                  <li>Capture entries and import normalized JSON.</li>
-                  <li>Capture every timetable day.</li>
-                  <li>Capture relevant draws for multiple pools.</li>
-                  <li>Review and correct unresolved entries.</li>
-                  <li>Use Now and Next, then publish the resolved schedule.</li>
-                </ol>
-                <div className="actions">
-                  <button className="secondary" onClick={() => setPanel('import')}>
-                    Import capture
-                  </button>
-                  <button className="secondary" onClick={() => setPanel('timetable')}>
-                    Add Timetable Record
-                  </button>
-                </div>
-              </section>
+              <CaptureWorkflow
+                data={data}
+                onImport={() => setPanel('import')}
+                onTimetable={() => setPanel('timetable')}
+                onEdit={(r) => {
+                  setEditing(r);
+                  setPanel('entry');
+                }}
+                onGenerate={() => {
+                  void persist(generateSchedule(data))
+                    .then(() => setMessage('Schedule generated and saved locally.'))
+                    .catch(() => setMessage('Generation failed. Existing data kept.'));
+                }}
+                onSave={persist}
+                onError={setMessage}
+              />
             )}
             {panel === 'import' && (
               <section className="panel">
                 <h2>Import / Export</h2>
                 <p className="muted">
-                  Paste CSV or TSV with a studentName,categoryName header, or import a schedule JSON
-                  file. Only those two columns are mandatory; incomplete entries stay in review.
+                  Import normalized capture JSON, schedule JSON, saved HTML, or CSV/TSV/plain text
+                  with a studentName,categoryName header. Incomplete entries stay in review.
                 </p>
                 <label className="field">
                   <span>Import text</span>
@@ -477,6 +483,13 @@ export default function Organizer() {
                     placeholder="studentName,categoryName,pool,tatami,eventDate,startTime"
                   />
                 </label>
+                <Field
+                  label="Capture source URL (for saved HTML)"
+                  type="url"
+                  value={sourceUrl}
+                  onChange={(e) => setSourceUrl(e.target.value)}
+                  placeholder={data.tournament.tournamentUrl}
+                />
                 <label className="field">
                   <span>Import file</span>
                   <input

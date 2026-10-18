@@ -776,3 +776,31 @@ dialog svg {
     break-inside: avoid;
   }
 }
+.workflow-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 20px 0;
+}
+.workflow-steps button {
+  font-size: 12px;
+  padding: 8px 11px;
+}
+.workflow-steps button[aria-current='step'] {
+  background: var(--ink);
+  color: white;
+}
+.capture-workflow h3 {
+  font-size: 19px;
+  margin-top: 20px;
+}
+.capture-workflow > .actions {
+  margin-top: 20px;
+}
+.review-item {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.review-item ul {
+  padding-left: 20px;
+}
