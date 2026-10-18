@@ -1,0 +1,15 @@
+node_modules/
+.next/
+.npm-cache/
+.playwright/
+playwright-report/
+test-results/
+coverage/
+*.tsbuildinfo
+.env*
+!.env.example
+public/sw.js*
+public/swe-worker*.js*
+.vercel/
+*.ama-recovery.json
+*.log

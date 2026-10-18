@@ -5,9 +5,10 @@ Authoritative scope: `BUILD_PROMPT.md`. See `IMPLEMENTATION_PLAN.md` for section
 - [x] Verify exact workspace/Git root and clean initial status.
 - [x] Read `AGENTS.md` and all 2,528 lines of `BUILD_PROMPT.md`.
 - [x] Create phase plan, exhaustive acceptance mapping and external-action list.
-- [ ] Commit plan/status checkpoint.
-- [ ] Phase 1: runnable manual organizer, single-tournament persistence, views, imports/exports and offline PWA.
-- [ ] Phase 1 checks and Git checkpoint.
+- [x] Commit plan/status checkpoint (`b0e2d67`).
+- [x] Phase 1: runnable manual organizer, single-tournament persistence, views, imports/exports and production PWA shell.
+- [x] Phase 1 checks: formatting, lint, strict TypeScript, 46 unit/integration tests, userscript guard checks, production build and 4 mobile/desktop Playwright journeys. Dedicated offline browser scenarios remain in the final hardening suite.
+- [x] Phase 1 Git checkpoint (see Git log).
 - [ ] Phase 2: explicit capture helper, entries/timetable parser, guided imports and sanitized fixtures.
 - [ ] Phase 2 checks and Git checkpoint.
 - [ ] Phase 3: exact initial-pool mapping, review/manual corrections and later-round context.
@@ -36,3 +37,6 @@ Authoritative scope: `BUILD_PROMPT.md`. See `IMPLEMENTATION_PLAN.md` for section
 - Node.js 24 and npm 11 are available. Use `npm.cmd` to avoid the blocked PowerShell script launcher. pnpm is absent; npm is the selected package manager.
 - Initial Git branch: `main`, one existing commit ahead of origin; user commits are preserved.
 - Application files have not been created before the plan checkpoint.
+- Phase 1 is locally verified. Prepared parser/helper/mapping modules and synthetic fixtures are included in this checkpoint; their guided organizer integration is next.
+- One interrupted dependency installation was repaired with a clean repository-local reinstall. Dependency lockfile and repository-local browser/cache configuration are present.
+- First Playwright run exposed a select-label locator mismatch; corrected to an accessible combobox-role locator. All four organizer scenarios then passed.

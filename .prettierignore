@@ -1,0 +1,13 @@
+BUILD_PROMPT.md
+AGENTS.md
+package-lock.json
+.next
+.npm-cache
+.playwright
+node_modules
+public/sw.js*
+public/ama-sportdata-helper.user.js
+userscripts/ama-sportdata-helper.user.js
+test-results
+playwright-report
+coverage

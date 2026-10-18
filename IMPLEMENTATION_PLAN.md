@@ -40,21 +40,21 @@ Specification mapping: §§31–43, plus verification of every preceding section
 
 Every AC is assigned above; compact exhaustive index:
 
-| Acceptance criteria | Primary phase |
-| --- | --- |
-| 1 | 5 + owner Vercel deployment |
-| 2–7 | 1 and architecture review in 5 |
-| 8–12 | 2 |
-| 13–22 | 1 (capture enrichment in 2–3) |
-| 23–25 | 3 |
-| 26–34 | 1 |
-| 35 | 4 |
-| 36 | 1 and 4 |
-| 37–61 | 4 |
-| 62–63 | all phases |
-| 64–67 | every checkpoint, final gate in 5 |
-| 68 | all phases, final Git review |
-| 69 | 5 |
+| Acceptance criteria | Primary phase                     |
+| ------------------- | --------------------------------- |
+| 1                   | 5 + owner Vercel deployment       |
+| 2–7                 | 1 and architecture review in 5    |
+| 8–12                | 2                                 |
+| 13–22               | 1 (capture enrichment in 2–3)     |
+| 23–25               | 3                                 |
+| 26–34               | 1                                 |
+| 35                  | 4                                 |
+| 36                  | 1 and 4                           |
+| 37–61               | 4                                 |
+| 62–63               | all phases                        |
+| 64–67               | every checkpoint, final gate in 5 |
+| 68                  | all phases, final Git review      |
+| 69                  | 5                                 |
 
 ## Local tools, dependencies and environment
 

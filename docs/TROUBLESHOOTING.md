@@ -1,0 +1,27 @@
+# Troubleshooting
+
+| What you see                         | What to do                                                                                                                                                                            |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Invalid URL or missing event ID      | Copy the event's HTTPS Karate URL with a positive `vernr` value. Lookalike hosts, credentials, non-HTTPS schemes and other sports are rejected.                                       |
+| Verification still displayed         | Close the helper, complete SportData verification normally and wait for the page to load. The helper cannot process the challenge.                                                    |
+| Helper absent                        | Enable the userscript manager and helper for SportData, reload the normal page, and check the two exact allowed hosts. Use manual entry if your browser does not support userscripts. |
+| Unknown page layout / no entries     | Select the correct page type, inspect semantic table headings, or use saved HTML/CSV/manual entry. No rows are inferred from an unreadable layout.                                    |
+| No club matches                      | Add the exact displayed club name as an alias and recapture/import. `AMA` matches a complete club field, never arbitrary text containing those letters.                               |
+| Entries/timetable/draw missing       | Capture entries, every day of the timetable, and only the relevant multi-pool draws. The coverage and review sections show missing data.                                              |
+| Wrong or ambiguous pool/Tatami       | Open the original draw, identify the athlete's initial main pool, then edit the row. Finals, repechage and possible later rounds are not the initial schedule.                        |
+| Athlete name ambiguous               | Use the actual draw to distinguish names. The parser refuses broad fuzzy matches. Correct the row manually.                                                                           |
+| Team members absent                  | Add reliably identified team members manually; the parser does not invent names from a team label.                                                                                    |
+| Invalid JSON / CSV / TSV / HTML      | Check file type and displayed row errors. CSV/TSV requires a header; ISO dates and 24-hour times use the event timezone. Fix and re-import. The last valid schedule remains.          |
+| Duplicate row                        | Edit the existing Student + Category. Remove duplicates from the import; repeated draw appearances should not create additional primary entries.                                      |
+| Local storage failed                 | Allow site storage, use a regular browser profile with free space, and reload. Export a schedule before clearing anything. Private browsing may not persist data.                     |
+| Schedule missing on another browser  | Organizer data is local to a browser/profile. Import your schedule export, or use the published public link to view. A private recovery file restores publication control separately. |
+| Cannot publish / service unavailable | Connect Upstash and set the two server REST values. Check the deployment guide. The organizer remains usable without cloud publishing.                                                |
+| Invalid or lost edit token           | Import the correct private organizer recovery file on a trusted device. The public link cannot grant update authority. If the credential is lost, there is no account reset.          |
+| Rate limit reached                   | Wait for the indicated retry period. Do not repeatedly tap Publish or Refresh. Normal refresh is bounded.                                                                             |
+| Shared unavailable                   | Ask the organizer for the latest link. Unpublished and unknown IDs intentionally have the same message.                                                                               |
+| Offline / refresh failed             | The last loaded schedule remains visible. Check Last updated, reconnect and tap Refresh. Checked is the last successful check, not the publication time.                              |
+| Offline app shell unavailable        | Load the production HTTPS site once online, allow the service worker to activate, and reopen. `npm run dev` deliberately disables offline registration.                               |
+| Native sharing/clipboard unsupported | Use the displayed URL/text and copy it manually. WhatsApp sharing also has a Copy Message fallback.                                                                                   |
+| Notifications absent                 | Grant permission only if wanted and keep the page open. Some browsers do not support notifications. Closed-app delivery is not guaranteed.                                            |
+
+Do not send private recovery files, edit tokens, Redis credentials, cookies or verification information when reporting an issue. A sanitized HTML fixture of ordinary tournament content can help maintain the parser; remove identifying/private information first. The app itself uploads only normalized resolved publication rows.

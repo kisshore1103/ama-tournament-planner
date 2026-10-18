@@ -1,0 +1,57 @@
+{
+  "name": "ama-tatami-planner",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "npm run userscript:build && next build --webpack",
+    "start": "next start",
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "node scripts/e2e.mjs",
+    "browsers:install": "node scripts/browsers.mjs",
+    "userscript:check": "node scripts/userscript-check.mjs",
+    "userscript:build": "node scripts/userscript-build.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "@serwist/next": "latest",
+    "serwist": "latest",
+    "@tanstack/react-table": "latest",
+    "@upstash/redis": "latest",
+    "date-fns": "latest",
+    "date-fns-tz": "latest",
+    "dexie": "latest",
+    "qrcode.react": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "latest",
+    "@playwright/test": "latest",
+    "@tailwindcss/postcss": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "@testing-library/react": "latest",
+    "@testing-library/jest-dom": "latest",
+    "eslint": "latest",
+    "eslint-config-next": "latest",
+    "esbuild": "latest",
+    "fake-indexeddb": "latest",
+    "jsdom": "latest",
+    "prettier": "latest",
+    "tailwindcss": "latest",
+    "typescript": "latest",
+    "vitest": "latest"
+  }
+}
