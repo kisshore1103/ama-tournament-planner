@@ -50,10 +50,20 @@ See `README.md` for exact run/setup/capture/publishing steps, and `docs/REPOSITO
 
 ## External steps (owner account/device required)
 
-- [ ] GitHub sign-in/remote publishing if desired.
-- [ ] Vercel Hobby project and Upstash Redis connection/secrets.
+- [x] GitHub repository connected (owner confirmed); final application push handled at release checkpoint.
+- [x] Vercel project created and Upstash Redis connected; URL/token configured (owner confirmed).
+- [ ] Set `NEXT_PUBLIC_APP_URL` to the stable Vercel production HTTPS domain and redeploy.
 - [ ] Actual Vercel deployment and live sharing smoke test (AC1).
 - [ ] Physical phone PWA installation, Firefox/helper installation, real SportData capture and QR scan.
+
+## Release checkpoint verification
+
+- [x] Local implementation phases 1–5 are finished; deployed acceptance remains pending above.
+- [x] Re-ran lint, strict TypeScript, all 88 unit/integration tests, formatting, userscript checks and production build successfully before pushing.
+- [x] Re-ran all 18 mobile/desktop Playwright journeys against the production build successfully.
+- [x] `.env.example` contains empty Redis credential placeholders and safe local/default configuration only.
+- [x] Verified actual environment files and organizer recovery files are ignored; added private-key/certificate and secret-directory exclusions.
+- [x] Tracked-file credential-pattern scan found no secrets; `AGENTS.md` and `BUILD_PROMPT.md` remain unchanged.
 
 ## Findings
 

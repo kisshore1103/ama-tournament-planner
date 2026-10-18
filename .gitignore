@@ -12,4 +12,10 @@ public/sw.js*
 public/swe-worker*.js*
 .vercel/
 *.ama-recovery.json
+*.pem
+*.key
+*.p12
+*.pfx
+.secrets/
+secrets/
 *.log
